@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Snowblower Math - app</title>
+<link rel="stylesheet" href="https://unpkg.com/sakura.css/css/sakura.css">
+<style>
+  :root { --accent: #3a5a8a; }
+  h1 { color: var(--accent); margin-bottom: 0.2em; }
+  .tag { color: var(--accent); font-style: italic; }
+  .card { border: 1px solid #ddd; border-left: 4px solid var(--accent); padding: 1em 1.2em; margin: 1.2em 0; border-radius: 4px; }
+  .big { font-size: 1.2rem; font-weight: 700; color: var(--accent); margin-top: 0.8em; }
+  .err { color: #b00; font-weight: 700; }
+  label { display: block; margin-top: 0.6em; font-size: 0.9em; }
+  input, select { max-width: 12em; }
+  .foot { margin-top: 2.5em; font-size: 0.85em; color: #777; }
+</style>
+</head>
+<body>
+<h1>Snowblower Math</h1>
+<p class="tag">Engine truth, intake truth and throw truth - labeled norms, honest arithmetic.</p>
+
+<div class="card">
+  <h3>The engine truth</h3>
+  <label for="e-cc">Engine size (cc)</label>
+  <input id="e-cc" type="number" step="any" value="208">
+  <label for="e-hp">Horsepower the box claims</label>
+  <input id="e-hp" type="number" step="any" value="8">
+  <p class="big" id="e-out"></p>
+</div>
+
+<div class="card">
+  <h3>The intake truth</h3>
+  <label for="i-intake">Intake height (inches)</label>
+  <input id="i-intake" type="number" step="any" value="21">
+  <label for="i-storm">Storm depth (inches)</label>
+  <input id="i-storm" type="number" step="any" value="14">
+  <p class="big" id="i-out"></p>
+</div>
+
+<div class="card">
+  <h3>The throw truth</h3>
+  <label for="t-sticker">Sticker throw (feet)</label>
+  <input id="t-sticker" type="number" step="any" value="40">
+  <label for="t-keep">Snow keep (0.8 powder, 0.55 packed, 0.35 wet)</label>
+  <input id="t-keep" type="number" step="any" value="0.55">
+  <label for="t-need">Feet to the drop zone</label>
+  <input id="t-need" type="number" step="any" value="15">
+  <p class="big" id="t-out"></p>
+</div>
+
+<p class="foot">The 32-cc-per-horse norm and the snow keep figures are labeled norms - the arithmetic is honest, and the snow on the hedge keeps the honest ledger.</p>
+
+<script src="engine.js"></script>
+<script>
+function g(id){ return document.getElementById(id); }
+function v(id){ var n = parseFloat(g(id).value); return isNaN(n) ? NaN : n; }
+function show(id, s, bad){ var el = g(id); el.textContent = s; el.className = bad ? "err big" : "big"; }
+
+function runEngine(){
+  var args = [v("e-cc"), v("e-hp")];
+  var r = SnowblowerMath.enginePlan.apply(null, args);
+  if (r.error) return show("e-out", r.error, true);
+  show("e-out", SnowblowerMath.renderEngine.apply(null, [r].concat(args)), false);
+}
+function runIntake(){
+  var args = [v("i-intake"), v("i-storm")];
+  var r = SnowblowerMath.intakePlan.apply(null, args);
+  if (r.error) return show("i-out", r.error, true);
+  show("i-out", SnowblowerMath.renderIntake.apply(null, [r].concat(args)), false);
+}
+function runThrow(){
+  var args = [v("t-sticker"), v("t-keep"), v("t-need")];
+  var r = SnowblowerMath.throwPlan.apply(null, args);
+  if (r.error) return show("t-out", r.error, true);
+  show("t-out", SnowblowerMath.renderThrow.apply(null, [r].concat(args)), false);
+}
+["e-cc", "e-hp"].forEach(function(id){ g(id).addEventListener("input", runEngine); });
+["i-intake", "i-storm"].forEach(function(id){ g(id).addEventListener("input", runIntake); });
+["t-sticker", "t-keep", "t-need"].forEach(function(id){ g(id).addEventListener("input", runThrow); });
+runEngine(); runIntake(); runThrow();
+</script>
+</body>
+</html>
